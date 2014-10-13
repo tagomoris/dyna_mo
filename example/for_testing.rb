@@ -18,6 +18,8 @@ module MyModule # External module definition (other's gem)
   end
 end
 
+## DynaMo methods can't call `super` correctly
+
 # in test helper
 dynamo_define('MyModule::MyClass', default_context = :mytest_case_default) do
   def_method(:initialize) do # == def_instance_method
