@@ -1,5 +1,7 @@
 module DynaMo
   class OverrideMethod
+    attr_reader :context, :name
+
     def initialize(context, name, &block)
       @context = context.to_sym
       @name = name.to_sym
