@@ -24,8 +24,15 @@ module DynaMo
 
       -> (*args) {
         Thread.current[:dynamo_contexts] ||= {}
+        Thread.current[:dynamo_stack] ||= []
+
         if Thread.current[:dynamo_contexts][context]
-          instance_exec(*args, &override)
+          Thread.current[:dynamo_stack].push(-> (*args) { super(*args) })
+          begin
+            instance_exec(*args, &override)
+          ensure
+            Thread.current[:dynamo_stack].pop
+          end
         else
           super(*args)
         end

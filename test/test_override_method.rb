@@ -39,7 +39,7 @@ class OverrideMethodTest < Test::Unit::TestCase
     assert { t1.name == "target1" }
 
     m1 = DynaMo::OverrideMethod.new(:test_instance_methods, :name) do
-      "p#{@n}:target#{@n}"
+      "p#{@n}:" + virtual_dynamo_super()
     end
 
     Target1.send(:prepend, m1.applied_module)
@@ -89,6 +89,17 @@ class OverrideMethodTest < Test::Unit::TestCase
     assert { Target2.label == "target1" }
     virtual_dynamo_context(:test_class_methods) do
       assert { Target2.label == "p1:target1" }
+    end
+    assert { Target2.label == "target1" }
+
+    m2 = DynaMo::OverrideMethod.new(:test_class_methods, :label) do
+      virtual_dynamo_super().gsub(/1/, '2')
+    end
+    (class << Target2; self; end).send(:prepend, m2.applied_module)
+
+    assert { Target2.label == "target1" }
+    virtual_dynamo_context(:test_class_methods) do
+      assert { Target2.label == "p2:target2" }
     end
     assert { Target2.label == "target1" }
   end
