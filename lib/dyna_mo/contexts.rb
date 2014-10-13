@@ -3,6 +3,7 @@ require "dyna_mo/override_method"
 module DynaMo
   class Contexts
     attr_reader :module_name
+    attr_accessor :default_context_name
 
     def initialize(mod_name, default_context_name)
       # mod_name MUST be string here to assure target module_name consistency
