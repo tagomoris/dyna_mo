@@ -19,7 +19,7 @@ module MyModule
   end
 end
 
-dynamo_define('MyModule::MyClass', default_context = :mytest_case_default) do
+dynamo_define('MyModule::MyClass', :mytest_case_default) do
   def_method(:initialize) do
     @num = 1
   end
@@ -33,10 +33,10 @@ dynamo_define('MyModule::MyClass', default_context = :mytest_case_default) do
   end
 
   def_method(:sum) do |numbers|
-    @num + numbers.reduce(:+)
+    @num + numbers.reduce(:+) + 1
   end
 
-  def_singleton_method(:create) do |init_num=0|
+  def_class_method(:create) do |init_num=0|
     obj = self.new
     obj.num = init_num
     obj
@@ -45,26 +45,28 @@ end
 
 class SynopsisTest < Test::Unit::TestCase
   def test_synopsis
-    assert_equal "name", MyModule::MyClass.new.name
+    assert { MyModule::MyClass.new.name == "name" }
 
     obj = MyModule::MyClass.new
 
-    assert_equal 0, obj.num
-    assert_equal "name", obj.name
+    assert { obj.num == 0 }
+    assert { obj.name == "name" }
 
     dynamo_context(:mytest_case_default) do
-      assert_equal 0, obj.num # not overridden
+      assert { obj.num == 0 } # #initialize is not overridden
 
-      assert_equal "dummyname", obj.name
-      assert_equal "dummyname", MyModule::MyClass.new.name
+      assert { obj.name == "dummyname" }
+      assert { MyModule::MyClass.new.name == "dummyname" }
 
-      assert_equal 1, MyModule::MyClass.new.num
+      assert { MyModule::MyClass.new.num == 1 }
 
-      assert_equal 100, MyModule::MyClass.create(100).num
+      assert { MyModule::MyClass.new.sum([1,2,3]) == (1+(1+2+3)+1) }
+
+      assert { MyModule::MyClass.create(100).num == 100 }
     end
 
     dynamo_context(:mytest_case1) do
-      assert_equal "dummyname1", obj.name
+      assert { obj.name == "dummyname1" }
     end
 
     dynamo_define(MyModule::MyClass, :onetime_context) do
@@ -74,7 +76,26 @@ class SynopsisTest < Test::Unit::TestCase
     end
 
     dynamo_context(:onetime_context) do
-      assert_equal "onetime", obj.name
+      assert { obj.name == "onetime" }
+    end
+  end
+end
+
+module MyModule
+  class MyClass2 < MyClass
+  end
+end
+
+class Synopsis2Test < Test::Unit::TestCase
+  def test_onece_more
+    dynamo_define(MyModule::MyClass, :onetime_context) do
+      def_method(:name) do
+        "onetime"
+      end
+    end
+
+    dynamo_context(:onetime_context) do
+      assert { MyModule::MyClass2.new.name == "onetime" }
     end
   end
 end
