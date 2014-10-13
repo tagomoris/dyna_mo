@@ -4,14 +4,6 @@ require "dyna_mo/module"
 
 module DynaMo
   # constants or ...
-  @@context_store = {}
-  @@context_mutex = Mutex.new
-
-  def self.synchronize
-    @@context_mutex.synchronize do
-      yield
-    end
-  end
 end
 
 require "dyna_mo/contexts"
