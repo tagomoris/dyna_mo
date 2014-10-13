@@ -4,18 +4,9 @@ require 'dyna_mo'
 module MyModule
   class MyClass
     attr_accessor :num
-
-    def initialize
-      @num = 0
-    end
-
-    def name
-      "name"
-    end
-
-    def sum(numbers)
-      @num + numbers.reduce(:+)
-    end
+    def initialize; @num = 0; end
+    def name; "name"; end
+    def sum(numbers); @num + numbers.reduce(:+); end
   end
 end
 
@@ -81,10 +72,7 @@ class SynopsisTest < Test::Unit::TestCase
   end
 end
 
-module MyModule
-  class MyClass2 < MyClass
-  end
-end
+module MyModule; class MyClass2 < MyClass; end; end
 
 class Synopsis2Test < Test::Unit::TestCase
   def test_onece_more

@@ -34,7 +34,7 @@ class ContextsTest < Test::Unit::TestCase
       "foobar2:" + x
     end
 
-    cxt.apply
+    cxt.__apply__
 
     assert { Foo::Bar.new.text == "foobar" }
     virtual_dynamo_context(:test_i0) do
@@ -51,7 +51,7 @@ class ContextsTest < Test::Unit::TestCase
       "foobar_zero"
     end
 
-    cxt.apply
+    cxt.__apply__
 
     assert { Foo::Bar.new.text == "foobar" }
     virtual_dynamo_context(:test_i0) do
@@ -82,7 +82,7 @@ class ContextsTest < Test::Unit::TestCase
     end
     # test_s0 is prior for Foo::Bar
 
-    cxt1.apply
+    cxt1.__apply__
 
     # subclass methods are prior, and prepended methods, original methods
     assert { Foo::Baz.new.text == "foobarbaz" }
@@ -104,7 +104,7 @@ class ContextsTest < Test::Unit::TestCase
     end
     # test_m0 is prior for Foo::Bar
 
-    cxt1.apply
+    cxt1.__apply__
 
     cxt2 = DynaMo::Contexts.new('Foo::Baz', :test_m0)
     cxt2.def_method(:text) do
@@ -115,7 +115,7 @@ class ContextsTest < Test::Unit::TestCase
     end
     # test_m1 is prior for Foo:Baz
 
-    cxt2.apply
+    cxt2.__apply__
 
     virtual_dynamo_context(:test_m0) do
       virtual_dynamo_context(:test_m1) do

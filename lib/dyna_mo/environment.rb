@@ -19,7 +19,7 @@ module DynaMo
 
     def self.apply_environment
       @@contexts_store.each do |name, contexts|
-        contexts.apply
+        contexts.__apply__
       end
       true
     end
