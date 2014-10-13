@@ -1,13 +1,19 @@
 module DynaMo
   class OverrideMethod
-    def initialize(context, name, class_method = nil, &block)
+    def initialize(context, name, &block)
       @context = context.to_sym
       @name = name.to_sym
       @override = block
+
+      @mod = nil
     end
 
-    def apply(mod)
+    def applied_module
+      return @mod if @mod
+
+      mod = Module.new
       mod.__send__(:define_method, @name, self.to_proc)
+      @mod = mod
     end
 
     def to_proc

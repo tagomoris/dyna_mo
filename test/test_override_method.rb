@@ -26,6 +26,14 @@ class Target2 < Target1
 end
 
 class OverrideMethodTest < Test::Unit::TestCase
+  def test_applied_module_returns_unique_instance
+    m1 = DynaMo::OverrideMethod.new(:test_applied_module, :foo) do
+      "foo"
+    end
+    obj1 = m1.applied_module
+    assert { obj1.object_id == m1.applied_module.object_id }
+  end
+
   def test_instance_methods
     t1 = Target1.new
     assert { t1.name == "target1" }
@@ -34,9 +42,7 @@ class OverrideMethodTest < Test::Unit::TestCase
       "p#{@n}:target#{@n}"
     end
 
-    mod1 = Module.new
-    m1.apply(mod1)
-    Target1.send(:prepend, mod1)
+    Target1.send(:prepend, m1.applied_module)
 
     assert { t1.name == "target1" }
     Thread.current[:dynamo_contexts] = { test_instance_methods: true }
@@ -50,13 +56,14 @@ class OverrideMethodTest < Test::Unit::TestCase
     m2 = DynaMo::OverrideMethod.new(:test_instance_methods, :initialize) do
       @n = 1111
     end
-    m2.apply(mod1)
+    Target2.prepend(m2.applied_module)
+    t2 = Target2.new
 
     assert { t1.name == "target1" }
     Thread.current[:dynamo_contexts] = { test_instance_methods: true }
     begin
       assert { t1.name == "p1:target1" }
-      assert { Target2.new.name == "p2:target2" }
+      assert { t2.name == "p2:target2" }
     ensure
       Thread.current[:dynamo_contexts] = {}
     end
@@ -64,26 +71,25 @@ class OverrideMethodTest < Test::Unit::TestCase
 
     Thread.current[:dynamo_contexts] = { test_instance_methods: true }
     begin
-      assert { Target1.new.name == "p1111:target1111" }
-      assert { Target2.new.name == "p2:target2" }
+      assert { Target1.new.name == "p1:target1" }
+      assert { Target2.new.name == "p1111:target1111" }
     ensure
       Thread.current[:dynamo_contexts] = {}
     end
   end
 
-  def test_singleton_methods
+  def test_class_methods
     assert { Target1.label == "target1" }
 
-    m1 = DynaMo::OverrideMethod.new(:test_singleton_methods, :label) do
+    m1 = DynaMo::OverrideMethod.new(:test_class_methods, :label) do
       "p1:target1"
     end
 
-    mod1 = Module.new
-    m1.apply(mod1)
+    mod1 = m1.applied_module
     (class << Target1; self; end).send(:prepend, mod1)
 
     assert { Target1.label == "target1" }
-    Thread.current[:dynamo_contexts] = { test_singleton_methods: true }
+    Thread.current[:dynamo_contexts] = { test_class_methods: true }
     begin
       assert { Target1.label == "p1:target1" }
     ensure
@@ -93,7 +99,7 @@ class OverrideMethodTest < Test::Unit::TestCase
 
     # Target2.label is equal to Target1.self
     assert { Target2.label == "target1" }
-    Thread.current[:dynamo_contexts] = { test_singleton_methods: true }
+    Thread.current[:dynamo_contexts] = { test_class_methods: true }
     begin
       assert { Target2.label == "p1:target1" }
     ensure
