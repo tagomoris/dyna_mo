@@ -23,4 +23,11 @@ module Kernel
   def dynamo_super(*args)
     Thread.current[:dynamo_stack].last.call(*args)
   end
+
+  ## This method is to call `super` just like in original definition,
+  ## without calls of any other contexts' definition and original method definition
+  # def dynamo_ultra_super(*args)
+  #   # But, we need Method#super_method and something to get Method object now running...
+  #   raise NotImplementedError, "We need Kernel.current_method"
+  # end
 end
