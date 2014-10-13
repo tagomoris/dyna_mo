@@ -45,11 +45,8 @@ class OverrideMethodTest < Test::Unit::TestCase
     Target1.send(:prepend, m1.applied_module)
 
     assert { t1.name == "target1" }
-    Thread.current[:dynamo_contexts] = { test_instance_methods: true }
-    begin
+    virtual_dynamo_context(:test_instance_methods) do
       assert { t1.name == "p1:target1" }
-    ensure
-      Thread.current[:dynamo_contexts] = {}
     end
     assert { t1.name == "target1" }
 
@@ -60,21 +57,15 @@ class OverrideMethodTest < Test::Unit::TestCase
     t2 = Target2.new
 
     assert { t1.name == "target1" }
-    Thread.current[:dynamo_contexts] = { test_instance_methods: true }
-    begin
+    virtual_dynamo_context(:test_instance_methods) do
       assert { t1.name == "p1:target1" }
       assert { t2.name == "p2:target2" }
-    ensure
-      Thread.current[:dynamo_contexts] = {}
     end
     assert { t1.name == "target1" }
 
-    Thread.current[:dynamo_contexts] = { test_instance_methods: true }
-    begin
+    virtual_dynamo_context(:test_instance_methods) do
       assert { Target1.new.name == "p1:target1" }
       assert { Target2.new.name == "p1111:target1111" }
-    ensure
-      Thread.current[:dynamo_contexts] = {}
     end
   end
 
@@ -89,21 +80,15 @@ class OverrideMethodTest < Test::Unit::TestCase
     (class << Target1; self; end).send(:prepend, mod1)
 
     assert { Target1.label == "target1" }
-    Thread.current[:dynamo_contexts] = { test_class_methods: true }
-    begin
+    virtual_dynamo_context(:test_class_methods) do
       assert { Target1.label == "p1:target1" }
-    ensure
-      Thread.current[:dynamo_contexts] = {}
     end
     assert { Target1.label == "target1" }
 
     # Target2.label is equal to Target1.self
     assert { Target2.label == "target1" }
-    Thread.current[:dynamo_contexts] = { test_class_methods: true }
-    begin
+    virtual_dynamo_context(:test_class_methods) do
       assert { Target2.label == "p1:target1" }
-    ensure
-      Thread.current[:dynamo_contexts] = {}
     end
     assert { Target2.label == "target1" }
   end
